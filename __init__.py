@@ -2,7 +2,7 @@ bl_info = {
     "name": "Auto Sync Object Data Name",
     "description": "Automatically sync object data name with object name, with optional behavior settings.",
     "author": "GeeDoubleU",
-    "blender": (2, 83, 0),
+    "blender": (4, 0, 0),
     "location": "View3D -> Object",
     "category": "Object",
     "version": (1, 0, 0),
