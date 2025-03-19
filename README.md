@@ -1,5 +1,5 @@
 # Auto-Sync-Object-Data-Name
-**Auto Sync Object Data Name** is a Blender add-on that automatically synchronizes object data names with their corresponding object names. This helps maintain a clean and organized naming convention, especially when working with multiple objects and shared object data.
+**Auto Sync Object Data Name** is a Blender add-on that automatically synchronizes object data names with their corresponding object names.
 
 ## Features
 - Automatically renames object data to match object names.
@@ -13,14 +13,24 @@
 - Provides an option to warn the user if object data has multiple users.
 
 ## Compatibility
+- Blender `4.0.0` or later is recommended.
 
 ## Installation
+1. Download the `.zip` file from the GitHub repository.
 
-## Addon Preferences
+2. Open Blender and navigate to `Edit > Preferences > Add-ons`.
+
+3. Click `Install from Disk...` in the dropdown menu at the top right.
+
+4. Select the downloaded `.zip` file and install it.
+
+## Add-on Preferences
 After installing the add-on, you can find its preferences under:
-`Edit > Preferences > Add-ons > Auto Sync Object Data Name`.
+`Edit > Preferences > Add-ons > Auto Sync Object Data Name`. Preferences are hidden by default, click to expand the dropdown menu.
 
-### 1. Multi User Behavior
+![sync_settings](https://github.com/user-attachments/assets/25352b11-3883-436b-859f-4a2484b37b3d)
+
+### Multi-User Behavior
 
 Determines what happens when an object's data block has multiple users:
 
@@ -28,22 +38,26 @@ Determines what happens when an object's data block has multiple users:
 
 - **Do Nothing:** Leaves object data names unchanged.
 
-### 2. Multi User Warning
+### Warn
 
 - **Enabled:** Displays a warning if object data is shared among multiple objects.
 
 - **Disabled:** No warning is shown.
 
-### 3. Prefix
+### Prefix
 
 - Adds a custom prefix to new object data names.
 
-### 4. Affected Object Types
+### Affected Object Types
 
 - Choose which object types should be affected.
 
+![affected_object_types](https://github.com/user-attachments/assets/cc14fe2f-ed0c-4930-b3a2-7e7261e4d11a)
+
 ## Operator
-This addon also comes with an operator to manually sync names for multiple objects
+This add-on also comes with an operator to manually sync names for multiple objects.
+
+![operator](https://github.com/user-attachments/assets/c0bb0f43-5dcc-4677-9703-da2ca2b13c9f)
 
 **Mode:** `Object Mode`
 
@@ -62,4 +76,4 @@ This addon also comes with an operator to manually sync names for multiple objec
 - **Inverse:** The object's name is replaced with the object data name.
   
 > [!NOTE]
-> **Inverse** does not use the addon's preferences.
+> **Inverse** does not use the add-on's preferences.
