@@ -1,6 +1,9 @@
 # Auto-Sync-Object-Data-Name
 **Auto Sync Object Data Name** is a Blender add-on that automatically synchronizes object data names with their corresponding object names.
 
+![auto_sync_object_data_name_banner](https://github.com/user-attachments/assets/9298c3d8-d734-4659-9bf4-f1471fd2e163)
+
+
 ## Features
 - Automatically renames object data to match object names.
 
@@ -14,6 +17,8 @@
 
 ## Compatibility
 - Blender `4.0.0` or later is recommended.
+
+- May work for earlier Blender versions but no support will be provided if not fully working.
 
 ## Installation
 1. Download the `.zip` file from the GitHub repository.
@@ -57,7 +62,9 @@ Determines what happens when an object's data block has multiple users:
 ## Operator
 This add-on also comes with an operator to manually sync names for multiple objects.
 
-![operator](https://github.com/user-attachments/assets/c0bb0f43-5dcc-4677-9703-da2ca2b13c9f)
+<p align="center">
+  <img width="500" alt="operator" src="https://github.com/user-attachments/assets/c0bb0f43-5dcc-4677-9703-da2ca2b13c9f">
+</p>
 
 **Mode:** `Object Mode`
 
