@@ -1,5 +1,5 @@
-# Auto-Sync-Object-Data-Name
-**Auto Sync Object Data Name** is a Blender add-on that automatically synchronizes object data names with their corresponding object names.
+# Auto-Sync-Object-Data-Names
+**Auto Sync Object Data Names** is a Blender add-on that automatically synchronizes object data names with their corresponding object names.
 
 ![auto_sync_object_data_name_banner](https://github.com/user-attachments/assets/9298c3d8-d734-4659-9bf4-f1471fd2e163)
 
