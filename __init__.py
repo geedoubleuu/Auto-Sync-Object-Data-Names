@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "Auto Sync Object Data Name",
+    "name": "Auto Sync Object Data Names",
     "description": "Automatically sync object data name with object name, with optional behavior settings.",
     "author": "GeeDoubleU",
     "blender": (4, 0, 0),

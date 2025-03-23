@@ -77,13 +77,13 @@ def notify():
 def register_msgbus():
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.Object, "name"),
-        owner=__name__,
+        owner=__package__,
         args=(),
         notify=notify,
     )
 
 def unregister_msgbus():
-    bpy.msgbus.clear_by_owner(__name__)
+    bpy.msgbus.clear_by_owner(__package__)
 
 # Persistent handler to re-register msgbus on file load
 @persistent
