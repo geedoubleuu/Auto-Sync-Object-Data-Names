@@ -156,6 +156,7 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
             row.prop(self, "prefix")
             
         # Object type toggles
+        icon_curves = 'OUTLINER_OB_CURVES' if bpy.app.version >= (3, 2, 0) else 'OUTLINER_OB_HAIR'
         box = layout.box()
         col = box.column()
         
@@ -168,7 +169,7 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
             col.prop(self, "sync_surface", icon='OUTLINER_OB_SURFACE')
             col.prop(self, "sync_meta", icon='OUTLINER_OB_META')
             col.prop(self, "sync_text", icon='OUTLINER_OB_FONT')
-            col.prop(self, "sync_hair", icon='OUTLINER_OB_CURVES')
+            col.prop(self, "sync_hair", icon=icon_curves)
             col.prop(self, "sync_pointcloud", icon='OUTLINER_OB_POINTCLOUD')
             col.prop(self, "sync_volume", icon='OUTLINER_OB_VOLUME')
             col.prop(self, "sync_greasepencil", icon='OUTLINER_OB_GREASEPENCIL')

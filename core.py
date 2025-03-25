@@ -2,6 +2,8 @@ import bpy
 from bpy.app.handlers import persistent
 
 # Mapping between Blender object types and preferences
+greasepencil_type = 'GREASEPENCIL'if bpy.app.version >= (4, 3, 0) else 'GPENCIL'
+
 OBJECT_TYPE_MAPPING = {
     ('MESH', None): "sync_mesh",
     ('CURVE', None): "sync_curve",
@@ -11,7 +13,7 @@ OBJECT_TYPE_MAPPING = {
     ('CURVES', None): "sync_hair",
     ('POINTCLOUD', None): "sync_pointcloud",
     ('VOLUME', None): "sync_volume",
-    ('GREASEPENCIL', None): "sync_greasepencil",
+    (greasepencil_type, None): "sync_greasepencil",
     ('ARMATURE', None): "sync_armature",
     ('LATTICE', None): "sync_lattice",
     ('EMPTY', 'IMAGE'): "sync_image",
