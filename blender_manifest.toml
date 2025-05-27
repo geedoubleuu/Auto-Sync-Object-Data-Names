@@ -1,0 +1,24 @@
+schema_version = "1.0.0"
+
+id = "auto_sync_object_data_names"
+version = "1.0.0"
+name = "Auto Sync Object Data Names"
+tagline = "Automatically sync object and data names"
+maintainer = "GeeDoubleU"
+type = "add-on"
+
+website = "https://github.com/geedoubleuu/Auto-Sync-Object-Data-Names"
+
+tags = ["Object", "Pipeline"]
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+paths_exclude_pattern = [
+"__pycache__/",
+"/.git/",
+"/*.zip",
+]
