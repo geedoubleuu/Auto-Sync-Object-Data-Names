@@ -1,26 +1,27 @@
-import bpy
+import bpy, random, string
 from bpy.app.handlers import persistent
 
-# Mapping between Blender object types and preferences
+# Mapping between Blender object types, preferences, and bpy.data collections
 greasepencil_type = 'GREASEPENCIL'if bpy.app.version >= (4, 3, 0) else 'GPENCIL'
+greasepencil_col = "grease_pencils_v3" if bpy.app.version >= (4, 3, 0) else "grease_pencils"
 
 OBJECT_TYPE_MAPPING = {
-    ('MESH', None): "sync_mesh",
-    ('CURVE', None): "sync_curve",
-    ('SURFACE', None): "sync_surface",
-    ('META', None): "sync_meta",
-    ('FONT', None): "sync_text",
-    ('CURVES', None): "sync_hair",
-    ('POINTCLOUD', None): "sync_pointcloud",
-    ('VOLUME', None): "sync_volume",
-    (greasepencil_type, None): "sync_greasepencil",
-    ('ARMATURE', None): "sync_armature",
-    ('LATTICE', None): "sync_lattice",
-    ('EMPTY', 'IMAGE'): "sync_image",
-    ('LIGHT', None): "sync_light",
-    ('LIGHT_PROBE', None): "sync_lightprobe",
-    ('CAMERA', None): "sync_camera",
-    ('SPEAKER', None): "sync_speaker",
+    ('MESH', None): ("sync_mesh", "meshes"),
+    ('CURVE', None): ("sync_curve", "curves"),
+    ('SURFACE', None): ("sync_surface", "curves"),
+    ('META', None): ("sync_meta", "metaballs"),
+    ('FONT', None): ("sync_text", "curves"),
+    ('CURVES', None): ("sync_hair", "hair_curves"),
+    ('POINTCLOUD', None): ("sync_pointcloud", "pointclouds"),
+    ('VOLUME', None): ("sync_volume", "volumes"),
+    (greasepencil_type, None): ("sync_greasepencil", greasepencil_col),
+    ('ARMATURE', None): ("sync_armature", "armatures"),
+    ('LATTICE', None): ("sync_lattice", "lattices"),
+    ('EMPTY', 'IMAGE'): ("sync_image", "images"),
+    ('LIGHT', None): ("sync_light", "lights"),
+    ('LIGHT_PROBE', None): ("sync_lightprobe", "lightprobes"),
+    ('CAMERA', None): ("sync_camera", "cameras"),
+    ('SPEAKER', None): ("sync_speaker", "speakers"),
 }
 
 def get_addon_prefs():
@@ -30,11 +31,11 @@ def get_addon_prefs():
 def is_excluded_object(obj):
     prefs = get_addon_prefs()
     
-    # Either (obj.type, obj.empty_display_type) or (obj.type, None)
+    # Make key - either (obj.type, obj.empty_display_type) or (obj.type, None)
     obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
     
-    # Check if this type is disabled in preferences
-    prop_name = OBJECT_TYPE_MAPPING.get(obj_type)
+    # Get prop name via obj type key
+    prop_name, _ = OBJECT_TYPE_MAPPING.get(obj_type)
 
     # If the object type is not mapped, don't exclude
     if prop_name is None:
@@ -58,8 +59,27 @@ def sync_object_data_name(obj):
             return
 
         new_data_name = prefix + obj.name
+        old_data_name = obj.data.name
+
+        obj.data.name = new_data_name
         if obj.data.name != new_data_name:
-            obj.data.name = new_data_name
+            force_rename(obj, new_data_name, old_data_name)
+
+# Function to temporarily rename the conflicting data block so the current one can take it's name
+def force_rename(obj, new_data_name, old_data_name):    
+    obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
+
+    _, data_col_str = OBJECT_TYPE_MAPPING.get(obj_type)
+
+    data_col = getattr(bpy.data, data_col_str)
+    
+    root_name, _, _ = old_data_name.rpartition('.')
+
+    temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k = random.randint(5, 25)))
+
+    data_col[new_data_name].name = temp_name
+    obj.data.name = new_data_name
+    data_col[temp_name].name = root_name + ".001" # Here Blender should automatically find the lowest increment
 
 MULTI_USER_OBJECT_DATA = set()
 
@@ -71,11 +91,11 @@ def run_on_sync_complete(obj):
     if obj.data and obj.data.users > 1:
             MULTI_USER_OBJECT_DATA.add(obj.data.name)
 
-#Msgbus call back
+# Msgbus call back
 def notify():
     bpy.ops.object.auto_sync_object_data_name()
 
-# Register msgbus to listen for object rename
+# Register msgbus to listen for object renames
 def register_msgbus():
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.Object, "name"),
@@ -210,8 +230,7 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
     
     def sync_object_name(self, obj):
         if obj and obj.data:
-            if obj.name != obj.data.name:
-                obj.name = obj.data.name
+            obj.name = obj.data.name
     
     def get_children_recursive(self, obj):
         children = []
