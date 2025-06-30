@@ -74,7 +74,7 @@ This add-on also comes with an operator to manually sync names for multiple obje
 
 - **Selected:** Syncs the names of selected objects only.
 
-- **All:** Syncs the names of all objects in the active scene.
+- **All:** Syncs the names of all objects in the blend file.
 
 ### Options
 
