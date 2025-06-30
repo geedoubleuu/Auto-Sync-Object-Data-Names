@@ -85,11 +85,12 @@ MULTI_USER_OBJECT_DATA = set()
 
 # Adds multi user data to MULTI_USER_OBJECT_DATA
 def run_on_sync_complete(obj):
-    if is_excluded_object(obj):
+    if obj and obj.data:
+        if is_excluded_object(obj):
             return
-    global MULTI_USER_OBJECT_DATA
-    if obj.data and obj.data.users > 1:
-            MULTI_USER_OBJECT_DATA.add(obj.data.name)
+        global MULTI_USER_OBJECT_DATA
+        if obj.data and obj.data.users > 1:
+                MULTI_USER_OBJECT_DATA.add(obj.data.name)
 
 # Msgbus call back
 def notify():
