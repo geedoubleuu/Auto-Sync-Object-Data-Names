@@ -124,11 +124,7 @@ class OBJECT_OT_auto_sync_object_data_name(bpy.types.Operator):
     
     def execute(self, context):
         objects = set(bpy.context.selected_objects)
-        active_obj = bpy.context.view_layer.objects.active
         prefs = get_addon_prefs()
-
-        if active_obj:
-            objects.add(active_obj)
 
         for obj in objects:
             sync_object_data_name(obj)
