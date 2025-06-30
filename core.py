@@ -156,8 +156,8 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
         name="Affect",
         description="Which objects to affect",
         items=[
-            ('SELECTED', "Selected", "Only sync selected objects"),
-            ('ALL', "All", "Sync all objects in the active scene"),
+            ('SELECTED', "Selected", "Sync selected objects"),
+            ('ALL', "All", "Sync all objects in the blend file"),
         ],
         default='SELECTED',
     )
@@ -202,7 +202,7 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
                 for obj in context.selected_objects:
                     objects.update(self.get_children_recursive(obj))
         else:
-            objects.update(context.scene.objects)
+            objects.update(bpy.data.objects)
         
         if self.inverse_operation:
             unregister_msgbus()
