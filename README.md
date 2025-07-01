@@ -83,4 +83,4 @@ This add-on also comes with an operator to manually sync names for multiple obje
 - **Inverse:** The object's name is replaced with the object data name.
   
 > [!NOTE]
-> **Inverse** does not use the add-on's preferences.
+> **Inverse** only uses **Affected Object Types** preferences.

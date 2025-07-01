@@ -227,6 +227,8 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
     
     def sync_object_name(self, obj):
         if obj and obj.data:
+            if is_excluded_object(obj):
+                return
             obj.name = obj.data.name
     
     def get_children_recursive(self, obj):
