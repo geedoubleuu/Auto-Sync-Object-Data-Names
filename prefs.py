@@ -141,8 +141,7 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
         box = layout.box()
         col = box.column()
 
-        self.draw_fake_dropdown(col, self, 'show_sync_settings', "Sync Settings", 'SETTINGS')
-        if self.show_sync_settings:
+        if draw_dropdown(col, self, 'show_sync_settings', "Sync Settings", 'SETTINGS'):
 
             # Multi user behavior settings
             row = col.row()
@@ -160,8 +159,8 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
         box = layout.box()
         col = box.column()
         
-        self.draw_fake_dropdown(col, self, 'show_object_types', "Affected Object Types", 'OBJECT_DATAMODE')
-        if self.show_object_types:
+        if draw_dropdown(col, self, 'show_object_types', "Affected Object Types", 'OBJECT_DATAMODE'):
+
             col.use_property_split = False
             
             col.prop(self, "sync_mesh", icon='OUTLINER_OB_MESH')
@@ -181,23 +180,24 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
             col.prop(self, "sync_camera", icon='OUTLINER_OB_CAMERA')
             col.prop(self, "sync_speaker", icon='OUTLINER_OB_SPEAKER')
 
-    # Note: This is a slightly modified fucntion from Cloudrig's prefs.py by Demeter Dzadik 
-    def draw_fake_dropdown(self, layout, prop_owner, prop_name, dropdown_text, prop_icon):
-        row = layout.row(align=True)
-        row.use_property_split = False
-        prop_value = prop_owner.path_resolve(prop_name)
-        icon = 'DOWNARROW_HLT' if prop_value else 'RIGHTARROW'
-        sub = row.row(align=True)
-        sub.alignment='LEFT'
-        sub.prop(prop_owner, prop_name, icon=icon, emboss=False, text="")
-        sub.prop(prop_owner, prop_name, icon=prop_icon, emboss=False, text=dropdown_text)
-        sub = row.row(align=True)
-        sub.alignment='LEFT'
-        sub.scale_x = 100
-        sub.prop(prop_owner, prop_name, icon='BLANK1', emboss=False, text="")
-        dropdown_col = layout.column()
+def draw_dropdown(layout, data, expand_prop, label, icon):
+    row = layout.row(align=True)
+    row.use_property_split = False
+    sub = row.row(align=True) # Sub stops label from getting clipped by ghost button
+    sub.alignment='LEFT'
 
-        return dropdown_col
+    expanded = getattr(data, expand_prop)
+    arrow = 'DOWNARROW_HLT' if expanded else 'RIGHTARROW'
+
+    sub.prop(data, expand_prop, icon=arrow, emboss=False, text="")
+    sub.prop(data, expand_prop, icon=icon, emboss=False, text=label)
+    # Below creates a ghost button that streches horizontally so we don't have to click dirrectly on the label
+    sub = row.row(align=True)
+    sub.alignment='LEFT'
+    sub.scale_x = 100
+    sub.prop(data, expand_prop, icon='BLANK1', emboss=False, text="")
+
+    return expanded
 
 # Addon registration
 def register():
