@@ -1,4 +1,6 @@
-import bpy, random, string
+import bpy
+import random
+import string
 from bpy.app.handlers import persistent
 
 # Mapping between Blender object types, preferences, and bpy.data collections
@@ -24,33 +26,36 @@ OBJECT_TYPE_MAPPING = {
     ('SPEAKER', None): ("sync_speaker", "speakers"),
 }
 
+
 def get_addon_prefs():
     return bpy.context.preferences.addons[__package__].preferences
-    
-# Function to check if an object type should be excluded based on user preferences
+
+
 def is_excluded_object(obj):
+    """Check if an object type should be excluded based on user preferences"""
     prefs = get_addon_prefs()
-    
+
     # Make key - either (obj.type, obj.empty_display_type) or (obj.type, None)
     obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
-    
+
     # Get prop name via obj type key
     prop_name, _ = OBJECT_TYPE_MAPPING.get(obj_type)
 
     # If the object type is not mapped, don't exclude
     if prop_name is None:
         return False
-    
+
     # Check if the property is disabled in preferences
     is_disabled = not getattr(prefs, prop_name, False)
-    
+
     return is_disabled
+
 
 def sync_object_data_name(obj):
     if obj and obj.data:
         if is_excluded_object(obj):
             return
-                    
+
         prefs = get_addon_prefs()
         prefix = prefs.prefix
 
@@ -65,38 +70,42 @@ def sync_object_data_name(obj):
         if obj.data.name != new_data_name:
             force_rename(obj, new_data_name, old_data_name)
 
-# Function to temporarily rename the conflicting data block so the current one can take it's name
-def force_rename(obj, new_data_name, old_data_name):    
+
+def force_rename(obj, new_data_name, old_data_name):
+    """Temporarily rename the conflicting data block"""
     obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
 
     _, data_col_str = OBJECT_TYPE_MAPPING.get(obj_type)
 
     data_col = getattr(bpy.data, data_col_str)
-    
+
     root_name, _, _ = old_data_name.rpartition('.')
 
-    temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k = random.randint(5, 25)))
+    temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k=random.randint(5, 25)))
 
     data_col[new_data_name].name = temp_name
     obj.data.name = new_data_name
-    data_col[temp_name].name = root_name + ".001" # Here Blender should automatically find the lowest increment
+    data_col[temp_name].name = root_name + ".001"  # Here Blender should automatically find the lowest increment
+
 
 MULTI_USER_OBJECT_DATA = set()
 
-# Adds multi user data to MULTI_USER_OBJECT_DATA
+
 def run_on_sync_complete(obj):
+    """Adds multi user data to MULTI_USER_OBJECT_DATA for warnings"""
     if obj and obj.data:
         if is_excluded_object(obj):
             return
         global MULTI_USER_OBJECT_DATA
         if obj.data and obj.data.users > 1:
-                MULTI_USER_OBJECT_DATA.add(obj.data.name)
+            MULTI_USER_OBJECT_DATA.add(obj.data.name)
 
-# Msgbus call back
+
 def notify():
+    """Msgbus call back to run auto sync operator"""
     bpy.ops.object.auto_sync_object_data_name()
 
-# Register msgbus to listen for object renames
+
 def register_msgbus():
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.Object, "name"),
@@ -105,53 +114,58 @@ def register_msgbus():
         notify=notify,
     )
 
+
 def unregister_msgbus():
     bpy.msgbus.clear_by_owner(__package__)
 
-# Persistent handler to re-register msgbus on file load
+
 @persistent
 def on_load_post(dummy):
+    """Persistent handler to re-register msgbus on file load"""
     unregister_msgbus()
     register_msgbus()
 
-# Used internally by msgbus call back to auto sync object data name with object name
+
 class OBJECT_OT_auto_sync_object_data_name(bpy.types.Operator):
     """Automatically syncs object data name with object name"""
 
     bl_idname = "object.auto_sync_object_data_name"
     bl_label = "Auto Sync Data Name"
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
-    
+
     def execute(self, context):
         objects = set(bpy.context.selected_objects)
         prefs = get_addon_prefs()
 
         for obj in objects:
             sync_object_data_name(obj)
-       
+
         if prefs.multi_user_warning:
             for obj in objects:
                 run_on_sync_complete(obj)
 
             if MULTI_USER_OBJECT_DATA:
                 message = "Object data has multiple users: " + ", ".join(sorted(MULTI_USER_OBJECT_DATA))
+
                 def draw(self, context):
                     self.layout.label(text=message)
-                # It seems that self.report doesn't show up in the status bar because it is called by python and not in the UI
-                bpy.context.window_manager.popup_menu(draw, title="Warning", icon='INFO') # Pop up is a bit annoying but better than nothing
-                self.report({'INFO'}, message) # Still useful since it prints to the console
+                # It seems that self.report doesn't show up in the status bar because it
+                # is called by python and not in the UI
+                # Pop up is a bit annoying but better than nothing
+                bpy.context.window_manager.popup_menu(draw, title="Warning", icon='INFO')
+                self.report({'INFO'}, message)  # Still useful since it prints to the console
                 MULTI_USER_OBJECT_DATA.clear()
 
         return {'FINISHED'}
 
-# Operator for mass name syncing with aditonal options
+
 class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
     """Synchronize object data names"""
 
     bl_idname = "object.sync_object_data_name"
     bl_label = "Sync Object Data Names"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     sync_scope: bpy.props.EnumProperty(
         name="Affect",
         description="Which objects to affect",
@@ -173,7 +187,7 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
         description="Inverse the syncing operation (Object Data Name -> Object Name)",
         default=False
     )
-    
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D'
@@ -183,7 +197,7 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
         layout.use_property_split = True
         row = layout.row()
         row.prop(self, "sync_scope", expand=True)
-        
+
         row = layout.row()
         row.active = (self.sync_scope == 'SELECTED')
         row.prop(self, "include_children")
@@ -203,7 +217,7 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
                     objects.update(self.get_children_recursive(obj))
         else:
             objects.update(bpy.data.objects)
-        
+
         if self.inverse_operation:
             unregister_msgbus()
             for obj in objects:
@@ -217,20 +231,20 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
             if prefs.multi_user_warning:
                 for obj in objects:
                     run_on_sync_complete(obj)
-        
+
         if MULTI_USER_OBJECT_DATA:
             message = "Object data has multiple users: " + ", ".join(sorted(MULTI_USER_OBJECT_DATA))
             self.report({'INFO'}, message)
             MULTI_USER_OBJECT_DATA.clear()
 
         return {'FINISHED'}
-    
+
     def sync_object_name(self, obj):
         if obj and obj.data:
             if is_excluded_object(obj):
                 return
             obj.name = obj.data.name
-    
+
     def get_children_recursive(self, obj):
         children = []
         for child in obj.children:
@@ -238,11 +252,12 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
             children.extend(self.get_children_recursive(child))
         return children
 
+
 def menu_add(self, context):
     self.layout.separator()
     self.layout.operator(OBJECT_OT_sync_object_data_name.bl_idname)
 
-# Addon registration
+
 def register():
     register_msgbus()
     bpy.app.handlers.load_post.append(on_load_post)
@@ -251,7 +266,7 @@ def register():
     bpy.types.VIEW3D_MT_object.append(menu_add)
     bpy.types.VIEW3D_MT_object_context_menu.append(menu_add)
 
-# Addon unregistration
+
 def unregister():
     unregister_msgbus()
     bpy.app.handlers.load_post.remove(on_load_post)

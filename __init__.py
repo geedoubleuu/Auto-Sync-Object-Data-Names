@@ -11,12 +11,12 @@ bl_info = {
 import bpy
 from . import prefs, core
 
-# Addon registration
+
 def register():
     prefs.register()
     core.register()
 
-# Addon unregistration
+
 def unregister():
     prefs.unregister()
     core.unregister()

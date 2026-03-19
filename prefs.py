@@ -1,6 +1,6 @@
 import bpy
 
-#Addon prefs
+
 class ASODN_addon_preferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
@@ -12,111 +12,93 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
             ('NOTHING', "Do Nothing", "Leaves object data name unchanged"),
         ],
         default='RENAME',
-
     )
     multi_user_warning: bpy.props.BoolProperty(
         name="Warn",
         description="Warn the user if object data has multiple users",
         default=False,
     )
-
     prefix: bpy.props.StringProperty(
         name="Prefix",
         description="Prefix to add to object data names",
         default="",
     )
-
     # Boolean properties for each object type
     sync_mesh: bpy.props.BoolProperty(
         name="Mesh",
         description="Sync mesh names",
         default=True,
     )
-    
     sync_curve: bpy.props.BoolProperty(
         name="Curve",
         description="Sync curve names",
         default=True,
     )
-    
     sync_surface: bpy.props.BoolProperty(
         name="Surface",
         description="Sync surface names",
         default=True,
     )
-    
     sync_meta: bpy.props.BoolProperty(
         name="Meta",
         description="Sync meta names",
         default=True,
     )
-    
     sync_text: bpy.props.BoolProperty(
         name="Text",
         description="Sync text names",
         default=True,
     )
-    
     sync_hair: bpy.props.BoolProperty(
         name="Hair Curves",
         description="Sync hair curve names",
         default=True,
     )
-
     sync_pointcloud: bpy.props.BoolProperty(
         name="Point Cloud",
         description="Sync point cloud names",
         default=True,
     )
-    
     sync_volume: bpy.props.BoolProperty(
         name="Volume",
         description="Sync volume names",
         default=True,
     )
-    
     sync_greasepencil: bpy.props.BoolProperty(
         name="Grease Pencil",
         description="Sync grease pencil names",
         default=True,
     )
-    
     sync_armature: bpy.props.BoolProperty(
         name="Armature",
         description="Sync armature names",
         default=True,
     )
-    
     sync_lattice: bpy.props.BoolProperty(
         name="Lattice",
         description="Sync lattice names",
         default=True,
     )
-    
     sync_image: bpy.props.BoolProperty(
         name="Image",
         description="Sync image names",
         default=True,
     )
-
     sync_light: bpy.props.BoolProperty(
         name="Light",
         description="Sync light names",
         default=True,
     )
-    
     sync_lightprobe: bpy.props.BoolProperty(
         name="Light Probe",
         description="Sync light probe names",
         default=True,
     )
-    
     sync_camera: bpy.props.BoolProperty(
         name="Camera",
         description="Sync camera names",
         default=True,
     )
-    
     sync_speaker: bpy.props.BoolProperty(
         name="Speaker",
         description="Sync speaker names",
@@ -149,20 +131,19 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
 
             row = col.row(align=True)
             row.prop(self, "multi_user_warning")
-            
+
             # Prefix setting
             row = box.row()
             row.prop(self, "prefix")
-            
+
         # Object type toggles
         icon_curves = 'OUTLINER_OB_CURVES' if bpy.app.version >= (3, 2, 0) else 'OUTLINER_OB_HAIR'
         box = layout.box()
         col = box.column()
-        
+
         if draw_dropdown(col, self, 'show_object_types', "Affected Object Types", 'OBJECT_DATAMODE'):
 
             col.use_property_split = False
-            
             col.prop(self, "sync_mesh", icon='OUTLINER_OB_MESH')
             col.prop(self, "sync_curve", icon='OUTLINER_OB_CURVE')
             col.prop(self, "sync_surface", icon='OUTLINER_OB_SURFACE')
@@ -180,11 +161,12 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
             col.prop(self, "sync_camera", icon='OUTLINER_OB_CAMERA')
             col.prop(self, "sync_speaker", icon='OUTLINER_OB_SPEAKER')
 
+
 def draw_dropdown(layout, data, expand_prop, label, icon):
     row = layout.row(align=True)
     row.use_property_split = False
-    sub = row.row(align=True) # Sub stops label from getting clipped by ghost button
-    sub.alignment='LEFT'
+    sub = row.row(align=True)  # Sub stops label from getting clipped by ghost button
+    sub.alignment = 'LEFT'
 
     expanded = getattr(data, expand_prop)
     arrow = 'DOWNARROW_HLT' if expanded else 'RIGHTARROW'
@@ -193,16 +175,16 @@ def draw_dropdown(layout, data, expand_prop, label, icon):
     sub.prop(data, expand_prop, icon=icon, emboss=False, text=label)
     # Below creates a ghost button that streches horizontally so we don't have to click dirrectly on the label
     sub = row.row(align=True)
-    sub.alignment='LEFT'
+    sub.alignment = 'LEFT'
     sub.scale_x = 100
     sub.prop(data, expand_prop, icon='BLANK1', emboss=False, text="")
 
     return expanded
 
-# Addon registration
+
 def register():
     bpy.utils.register_class(ASODN_addon_preferences)
 
-# Addon unregistration
+
 def unregister():
     bpy.utils.unregister_class(ASODN_addon_preferences)
