@@ -31,9 +31,8 @@ def get_addon_prefs():
     return bpy.context.preferences.addons[__package__].preferences
 
 
-def is_excluded_object(obj):
+def is_excluded_object(obj, prefs):
     """Check if an object type should be excluded based on user preferences"""
-    prefs = get_addon_prefs()
 
     # Make key - either (obj.type, obj.empty_display_type) or (obj.type, None)
     obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
@@ -51,12 +50,11 @@ def is_excluded_object(obj):
     return is_disabled
 
 
-def sync_object_data_name(obj):
+def sync_object_data_name(obj, prefs):
     if obj and obj.data:
-        if is_excluded_object(obj):
+        if is_excluded_object(obj, prefs):
             return
 
-        prefs = get_addon_prefs()
         prefix = prefs.prefix
 
         # Check for multiple users
@@ -91,10 +89,10 @@ def force_rename(obj, new_data_name, old_data_name):
 MULTI_USER_OBJECT_DATA = set()
 
 
-def run_on_sync_complete(obj):
+def run_on_sync_complete(obj, prefs):
     """Adds multi user data to MULTI_USER_OBJECT_DATA for warnings"""
     if obj and obj.data:
-        if is_excluded_object(obj):
+        if is_excluded_object(obj, prefs):
             return
         global MULTI_USER_OBJECT_DATA
         if obj.data and obj.data.users > 1:
@@ -138,11 +136,11 @@ class OBJECT_OT_auto_sync_object_data_name(bpy.types.Operator):
         prefs = get_addon_prefs()
 
         for obj in objects:
-            sync_object_data_name(obj)
+            sync_object_data_name(obj, prefs)
 
         if prefs.multi_user_warning:
             for obj in objects:
-                run_on_sync_complete(obj)
+                run_on_sync_complete(obj, prefs)
 
             if MULTI_USER_OBJECT_DATA:
                 message = "Object data has multiple users: " + ", ".join(sorted(MULTI_USER_OBJECT_DATA))
@@ -221,16 +219,16 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
         if self.inverse_operation:
             unregister_msgbus()
             for obj in objects:
-                self.sync_object_name(obj)
+                self.sync_object_name(obj, prefs)
             register_msgbus()
 
         else:
             for obj in objects:
-                sync_object_data_name(obj)
+                sync_object_data_name(obj, prefs)
 
             if prefs.multi_user_warning:
                 for obj in objects:
-                    run_on_sync_complete(obj)
+                    run_on_sync_complete(obj, prefs)
 
         if MULTI_USER_OBJECT_DATA:
             message = "Object data has multiple users: " + ", ".join(sorted(MULTI_USER_OBJECT_DATA))
@@ -239,9 +237,9 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
 
         return {'FINISHED'}
 
-    def sync_object_name(self, obj):
+    def sync_object_name(self, obj, prefs):
         if obj and obj.data:
-            if is_excluded_object(obj):
+            if is_excluded_object(obj, prefs):
                 return
             obj.name = obj.data.name
 
