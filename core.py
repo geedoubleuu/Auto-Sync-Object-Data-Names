@@ -26,6 +26,12 @@ OBJECT_TYPE_MAPPING = {
     ('SPEAKER', None): ("sync_speaker", "speakers"),
 }
 
+# Stips "sync_" from mappings to be used in get_per_object_affixes()
+TYPE_TO_AFFIX = {
+    key: value[0].replace("sync_", "")
+    for key, value in OBJECT_TYPE_MAPPING.items()
+}
+
 
 def get_addon_prefs():
     return bpy.context.preferences.addons[__package__].preferences
@@ -55,18 +61,34 @@ def sync_object_data_name(obj, prefs):
         if is_excluded_object(obj, prefs):
             return
 
+        type_prefix, type_suffix = get_per_object_affixes(obj, prefs)
         prefix = prefs.prefix
+        suffix = prefs.suffix
 
         # Check for multiple users
         if obj.data.users > 1 and prefs.multi_user_behavior == 'NOTHING':
             return
 
-        new_data_name = prefix + obj.name
+        new_data_name = prefix + type_prefix + obj.name + type_suffix + suffix
         old_data_name = obj.data.name
 
         obj.data.name = new_data_name
         if obj.data.name != new_data_name:
             force_rename(obj, new_data_name, old_data_name)
+
+
+def get_per_object_affixes(obj, prefs):
+    obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
+
+    type_name = TYPE_TO_AFFIX.get(obj_type)
+
+    prefix_attr = f"{type_name}_prefix"
+    suffix_attr = f"{type_name}_suffix"
+
+    type_prefix = getattr(prefs, prefix_attr)
+    type_suffix = getattr(prefs, suffix_attr)
+
+    return type_prefix, type_suffix
 
 
 def force_rename(obj, new_data_name, old_data_name):
@@ -204,8 +226,8 @@ class OBJECT_OT_sync_object_data_name(bpy.types.Operator):
         row.prop(self, "inverse_operation")
 
     def execute(self, context):
-        prefs = get_addon_prefs()
         objects = set()
+        prefs = get_addon_prefs()
 
         if self.sync_scope == 'SELECTED':
             objects.update(context.selected_objects)
