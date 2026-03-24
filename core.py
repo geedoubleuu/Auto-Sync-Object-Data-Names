@@ -69,7 +69,10 @@ def sync_object_data_name(obj, prefs):
         if obj.data.users > 1 and prefs.multi_user_behavior == 'NOTHING':
             return
 
-        new_data_name = prefix + type_prefix + obj.name + type_suffix + suffix
+        # Normalize object name first
+        base_name = strip_affixes(obj.name, prefixes=[prefix, type_prefix], suffixes=[type_suffix, suffix],)
+
+        new_data_name = prefix + type_prefix + base_name + type_suffix + suffix
         old_data_name = obj.data.name
 
         obj.data.name = new_data_name
@@ -78,6 +81,22 @@ def sync_object_data_name(obj, prefs):
 
         if prefs.resync:
             obj.name = new_data_name
+
+
+def strip_affixes(name, prefixes, suffixes):
+    """Remove any matching prefix/suffix from name to avoid duplicates"""
+
+    # Strip prefixes
+    for p in prefixes:
+        if p and name.startswith(p):
+            name = name[len(p):]
+
+    # Strip suffixes
+    for s in suffixes:
+        if s and name.endswith(s):
+            name = name[:-len(s)]
+
+    return name
 
 
 def get_per_object_affixes(obj, prefs):
