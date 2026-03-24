@@ -303,7 +303,7 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
 
             row = sync_col.row(align=True)
             row.prop(self, "multi_user_warning")
-            
+
             # Affixes settings
             affixes_box = sync_box.box()
             affixes_col = affixes_box.column()
@@ -331,7 +331,7 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
         # Object type toggles
         obj_type_box = layout.box()
         obj_type_col = obj_type_box.column()
-        
+
         if draw_dropdown(obj_type_col, self, 'show_object_types', "Affected Object Types", 'OBJECT_DATAMODE'):
             obj_type_col.use_property_split = False
             obj_type_col.prop(self, "sync_mesh", icon='OUTLINER_OB_MESH')
@@ -370,6 +370,7 @@ def draw_dropdown(layout, data, expand_prop, label, icon):
     sub.prop(data, expand_prop, icon='BLANK1', emboss=False, text="")
 
     return expanded
+
 
 def draw_affixes_row(layout, data, label, icon, prefix_prop, suffix_prop):
     split = layout.split(align=True)
