@@ -18,6 +18,11 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
         description="Warn the user if object data has multiple users",
         default=False,
     )
+    resync: bpy.props.BoolProperty(
+        name="Resync",
+        description="Sync object data name back to object name after initial sync",
+        default=False,
+    )
     prefix: bpy.props.StringProperty(
         name="Prefix",
         description="Prefix to add to object data names",
@@ -310,6 +315,10 @@ class ASODN_addon_preferences(bpy.types.AddonPreferences):
 
             if draw_dropdown(affixes_col, self, 'show_affixes_settings', "Affixes", 'SORTBYEXT'):
                 affixes_col.use_property_split = False
+                split = affixes_col.split()
+                split.label()
+                split.prop(self, "resync")
+                split.label()
                 draw_affixes_row(affixes_col, self, "Global", 'OBJECT_DATA', "prefix", "suffix")
                 draw_affixes_row(affixes_col, self, "Mesh", 'OUTLINER_OB_MESH', "mesh_prefix", "mesh_suffix")
                 draw_affixes_row(affixes_col, self, "Curve", 'OUTLINER_OB_CURVE', "curve_prefix", "curve_suffix")

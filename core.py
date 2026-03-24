@@ -76,6 +76,9 @@ def sync_object_data_name(obj, prefs):
         if obj.data.name != new_data_name:
             force_rename(obj, new_data_name, old_data_name)
 
+        if prefs.resync:
+            obj.name = new_data_name
+
 
 def get_per_object_affixes(obj, prefs):
     obj_type = (obj.type, obj.empty_display_type if obj.type == 'EMPTY' else None)
