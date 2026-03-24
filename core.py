@@ -168,6 +168,80 @@ def on_load_post(dummy):
     register_msgbus()
 
 
+class TOPBAR_PT_data_name(bpy.types.Panel):
+    bl_space_type = 'TOPBAR'  # dummy
+    bl_region_type = 'HEADER'
+    bl_label = "Rename Object Data"
+    bl_ui_units_x = 14
+
+    def draw(self, context):
+        layout = self.layout
+        greasepencil_type = 'GREASEPENCIL'if bpy.app.version >= (4, 3, 0) else 'GPENCIL'
+
+        def row_with_icon(layout, icon):
+            row = layout.row()
+            row.activate_init = True
+            row.label(icon=icon)
+            return row
+
+        layout.label(text="Object Data Name")
+        obj = context.active_object
+        if not obj:
+            row = row_with_icon(layout, 'ERROR')
+            row.label(text="No active object")
+        elif not obj.data:
+            row = row_with_icon(layout, 'ERROR')
+            row.label(text="Active object has no object data")
+        elif obj.type == 'MESH':
+            row = row_with_icon(layout, 'MESH_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'CURVE':
+            row = row_with_icon(layout, 'CURVE_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'SURFACE':
+            row = row_with_icon(layout, 'SURFACE_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'META':
+            row = row_with_icon(layout, 'META_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'FONT':
+            row = row_with_icon(layout, 'FONT_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'CURVES':
+            row = row_with_icon(layout, 'CURVES_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'POINTCLOUD':
+            row = row_with_icon(layout, 'POINTCLOUD_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'VOLUME':
+            row = row_with_icon(layout, 'VOLUME_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == greasepencil_type:
+            row = row_with_icon(layout, 'OUTLINER_DATA_GREASEPENCIL')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'ARMATURE':
+            row = row_with_icon(layout, 'ARMATURE_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'LATTICE':
+            row = row_with_icon(layout, 'LATTICE_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'EMPTY':
+            row = row_with_icon(layout, 'IMAGE_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'LIGHT':
+            row = row_with_icon(layout, 'LIGHT_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'LIGHT_PROBE':
+            row = row_with_icon(layout, 'LIGHTPROBE_SPHERE')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'CAMERA':
+            row = row_with_icon(layout, 'CAMERA_DATA')
+            row.prop(obj.data, "name", text="")
+        elif obj.type == 'SPEAKER':
+            row = row_with_icon(layout, 'SPEAKER')
+            row.prop(obj.data, "name", text="")
+
+
 class OBJECT_OT_auto_sync_object_data_name(bpy.types.Operator):
     """Automatically syncs object data name with object name"""
 
@@ -300,19 +374,51 @@ def menu_add(self, context):
     self.layout.operator(OBJECT_OT_sync_object_data_name.bl_idname)
 
 
+addon_keymaps = []
+
+
+def register_keymaps():
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc is None:
+        return  # Can be None in background mode.
+
+    km = kc.keymaps.new(name="3D View", space_type='VIEW_3D')
+
+    kmi = km.keymap_items.new(
+        idname="wm.call_panel",
+        type='F2',
+        value='PRESS',
+        alt=True,
+    )
+    kmi.properties.name = 'TOPBAR_PT_data_name'
+    kmi.properties.keep_open = False
+    addon_keymaps.append((km, kmi))
+
+
+def unregister_keymaps():
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
+
+
 def register():
     register_msgbus()
     bpy.app.handlers.load_post.append(on_load_post)
+    bpy.utils.register_class(TOPBAR_PT_data_name)
     bpy.utils.register_class(OBJECT_OT_sync_object_data_name)
     bpy.utils.register_class(OBJECT_OT_auto_sync_object_data_name)
     bpy.types.VIEW3D_MT_object.append(menu_add)
     bpy.types.VIEW3D_MT_object_context_menu.append(menu_add)
+    register_keymaps()
 
 
 def unregister():
     unregister_msgbus()
     bpy.app.handlers.load_post.remove(on_load_post)
+    bpy.utils.unregister_class(TOPBAR_PT_data_name)
     bpy.utils.unregister_class(OBJECT_OT_sync_object_data_name)
     bpy.utils.unregister_class(OBJECT_OT_auto_sync_object_data_name)
     bpy.types.VIEW3D_MT_object.remove(menu_add)
     bpy.types.VIEW3D_MT_object_context_menu.remove(menu_add)
+    unregister_keymaps()
