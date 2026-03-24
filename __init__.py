@@ -5,7 +5,7 @@ bl_info = {
     "blender": (4, 0, 0),
     "location": "View3D > Object",
     "category": "Object",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
 }
 
 import bpy

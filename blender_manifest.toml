@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "auto_sync_object_data_names"
-version = "1.0.0"
+version = "1.0.1"
 name = "Auto Sync Object Data Names"
 tagline = "Automatically sync object and data names"
 maintainer = "GeeDoubleU"
